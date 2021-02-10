@@ -43,6 +43,7 @@ class Select_Contains: public Select{
     int column;
     std::string keyword;
   public:
+    ~Select_Contains() = default;
     Select_Contains(const Spreadsheet* sheet, const std::string& myColumn, const std::string& myKeyword){
       column = sheet->get_column_by_name(myColumn);
       keyword = myKeyword;
@@ -60,6 +61,10 @@ class Select_And: public Select{
     Select* left;
     Select* right;
   public:
+    ~Select_And(){
+      delete left;
+      delete right;
+    }
     Select_And(Select* myLeft, Select* myRight){
       left = myLeft;
       right = myRight;
@@ -77,6 +82,10 @@ class Select_Or: public Select{
     Select* left;
     Select* right;
   public:
+    ~Select_Or(){
+      delete left;
+      delete right;
+    }
     Select_Or(Select* myLeft, Select* myRight){
       left = myLeft;
       right = myRight;
@@ -93,6 +102,9 @@ class Select_Not: public Select{
   private:
     Select* child;
   public:
+    ~Select_Not(){
+      delete child;
+    }
     Select_Not(Select* myChild){
       child = myChild;
     }
