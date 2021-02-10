@@ -38,4 +38,70 @@ public:
     virtual bool select(const std::string& s) const = 0;
 };
 
+class Select_Contains: public Select{
+  private:
+    int column;
+    std::string keyword;
+  public:
+    Select_Contains(const Spreadsheet* sheet, const std::string& myColumn, const std::string& myKeyword){
+      column = sheet->get_column_by_name(myColumn);
+      keyword = myKeyword;
+    }
+    bool select(const Spreadsheet* sheet, int row) const{
+      if(sheet->cell_data(row, column).find(keyword) != std::string::npos){
+        return true;
+      }
+      return false;
+    }
+};
+
+class Select_And: public Select{
+  private:
+    Select* left;
+    Select* right;
+  public:
+    Select_And(Select* myLeft, Select* myRight){
+      left = myLeft;
+      right = myRight;
+    }
+    bool select(const Spreadsheet* sheet, int row) const{
+      if(left->select(sheet, row) && right->select(sheet, row)){
+        return true;
+      }
+      return false;
+    }
+};
+
+class Select_Or: public Select{
+  private:
+    Select* left;
+    Select* right;
+  public:
+    Select_Or(Select* myLeft, Select* myRight){
+      left = myLeft;
+      right = myRight;
+    }
+    bool select(const Spreadsheet* sheet, int row) const{
+      if(left->select(sheet, row) || right->select(sheet, row)){
+        return true;
+      }
+      return false;
+    }
+};
+
+class Select_Not: public Select{
+  private:
+    Select* child;
+  public:
+    Select_Not(Select* myChild){
+      child = myChild;
+    }
+    bool select(const Spreadsheet* sheet, int row) const{
+      if(!child->select(sheet, row)){
+        return true;
+      }
+      return false;
+    }
+};
+
 #endif //__SELECT_HPP__
