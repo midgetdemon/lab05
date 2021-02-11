@@ -4,24 +4,35 @@
 #include "gtest/gtest.h"
 
 
-TEST(SelectionTest, SingleDataSheet){
+TEST(SelectionTest, NoSelection){
 	Spreadsheet testsheet;
 	testsheet.set_column_names({"Animal"});
 	testsheet.add_row({"monkey"});
 
-	testsheet.set_selection(new Select_Contains(&testsheet, "Animal", ""));
+	testsheet.set_selection(new Select_Contains(&testsheet, "Animal", "ant"));
+
+	std::stringstream oss; 
+	testsheet.print_selection(oss);
+	EXPECT_EQ(oss.str(), ""); 
 	
-	std::stringstream oss;
+	oss.str("");
+
+	testsheet.set_selection(new Select_Contains(&testsheet, "Animal", "monkey")); 
+
 	testsheet.print_selection(oss);
 	EXPECT_EQ(oss.str(), "monkey \n");
-	oss.clear();
-/**
-	testsheet.set_selection(new Select_Contains(&testsheet, "Animal", "ant"));
-	testsheet.print_selection(oss);
-	EXPECT_EQ(oss.str(), "");
-**/  
 }
 
+TEST(SelectionTest, WrongData){
+	Spreadsheet test;
+	test.set_column_names({"Animal"});
+	test.add_row({"cat"});
+	test.set_selection(new Select_Contains(&test, "Animal", "ant"));
+	
+	std::stringstream oss;
+	test.print_selection(oss);
+	EXPECT_EQ(oss.str(), "");
+}
 
 TEST(SelectionTest, MultipleCars){
 	Spreadsheet testsheet;
@@ -35,15 +46,11 @@ TEST(SelectionTest, MultipleCars){
 	std::stringstream oss;
 	testsheet.print_selection(oss);
 	EXPECT_EQ(oss.str(), "cars red \nracecar green \n");
-	oss.clear(); 
-/**
-	testsheet.set_selection(new Select_Contains(&testsheet, "Model", "car"));
-	EXPECT_EQ(oss.str(), ""); 
-**/ 
+	oss.clear();  
 }
-/**
 
-TEST(SelectionTest, EmptyTest){
+
+TEST(SelectionTest, WrongColumnTest){
 	Spreadsheet test;
 	test.set_column_names({"First"});
 	test.add_row({"Bob"});
@@ -53,7 +60,37 @@ TEST(SelectionTest, EmptyTest){
 	test.print_selection(oss);
 	EXPECT_EQ(oss.str(), "");
 }
-**/ 
+
+TEST(SelectionTest, DuplicateCol){
+	Spreadsheet test;
+	test.set_column_names({"Class", "Class", "Major"});
+	test.add_row({"English", "Freshman", "CS"});
+	test.add_row({"History", "Senior", "Engineering"}); 
+	test.set_selection(new Select_Contains(&test, "Class", "Freshman"));
+	
+	std::stringstream oss;
+	test.print_selection(oss);
+	EXPECT_EQ(oss.str(), "");
+
+	oss.str("");
+
+	test.set_selection(new Select_Or((new Select_Contains(&test,"Class", "History")), (new Select_Contains(&test, "Major", "CS")))); 
+	test.print_selection(oss);
+	EXPECT_EQ(oss.str(), "English Freshman CS \nHistory Senior Engineering \n"); 	
+
+}
+
+TEST(SelectionTest, AndTest){
+	Spreadsheet test;
+	test.set_column_names({"Last", "First"});
+	test.add_row({"Doe", "Jane"});
+	test.add_row({"Le", "Cody"});
+	test.add_row({"Kim", "Zack"});
+	test.set_selection(new Select_And((new Select_Contains(&test, "Last", "Le")), (new Select_Contains(&test, "First", "Zack"))));
+	std::stringstream oss;
+	test.print_selection(oss);
+	EXPECT_EQ(oss.str(), "");
+}
 
 int main(int argc, char **argv) {
   ::testing::InitGoogleTest(&argc, argv);
