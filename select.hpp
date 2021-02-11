@@ -49,6 +49,9 @@ class Select_Contains: public Select{
       keyword = myKeyword;
     }
     bool select(const Spreadsheet* sheet, int row) const{
+      if(column == -1){
+	return false;
+      }
       if(sheet->cell_data(row, column).find(keyword) != std::string::npos){
         return true;
       }
