@@ -92,6 +92,28 @@ TEST(SelectionTest, AndTest){
 	EXPECT_EQ(oss.str(), "");
 }
 
+TEST(SelectionTest, Popsicles){
+	Spreadsheet testsheet;
+  	testsheet.set_column_names({"Flavor", "Color"});
+  	testsheet.add_row({"strawberry", "red"});
+  	testsheet.add_row({"cherry", "red"});
+  	testsheet.add_row({"strawberry kiwi", "pink"});
+  	testsheet.add_row({"watermelon", "pink"});
+  	testsheet.add_row({"mango", "yellow"});
+  	testsheet.add_row({"pineapple", "yellow"});
+  	testsheet.add_row({"banana", "yellow"});
+  	testsheet.add_row({"grape", "purple"});
+  	std::stringstream oss;
+  	testsheet.set_selection(new Select_Contains(&testsheet, "Flavor", "m"));
+  	testsheet.print_selection(oss);
+  	EXPECT_EQ(oss.str(), "watermelon pink \nmango yellow \n");
+  	oss.str("");
+  	testsheet.set_selection(new Select_Or(new Select_Contains(&testsheet, "Color", "red"), new Select_Not(new Select_Contains(&testsheet, "Color", "yellow"))));
+  	testsheet.print_selection(oss);
+  	EXPECT_EQ(oss.str(), "strawberry red \ncherry red \nstrawberry kiwi pink \nwatermelon pink \ngrape purple \n");
+  	oss.str("");
+}
+
 int main(int argc, char **argv) {
   ::testing::InitGoogleTest(&argc, argv);
   return RUN_ALL_TESTS();
